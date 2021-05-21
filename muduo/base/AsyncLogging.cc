@@ -17,6 +17,7 @@ AsyncLogging::AsyncLogging(const string& basename,
   : flushInterval_(flushInterval),
     running_(false),
     basename_(basename),
+    logpath_(""),
     rollSize_(rollSize),
     thread_(std::bind(&AsyncLogging::threadFunc, this), "Logging"),
     latch_(1),
@@ -30,6 +31,29 @@ AsyncLogging::AsyncLogging(const string& basename,
   nextBuffer_->bzero();
   buffers_.reserve(16);
 }
+
+AsyncLogging::AsyncLogging(const string& basename,
+                           off_t rollSize,
+                           const string& logpath,
+                           int flushInterval)
+  : flushInterval_(flushInterval),
+    running_(false),
+    basename_(basename),
+    logpath_(logpath),
+    rollSize_(rollSize),
+    thread_(std::bind(&AsyncLogging::threadFunc, this), "Logging"),
+    latch_(1),
+    mutex_(),
+    cond_(mutex_),
+    currentBuffer_(new Buffer),
+    nextBuffer_(new Buffer),
+    buffers_()
+{
+  currentBuffer_->bzero();
+  nextBuffer_->bzero();
+  buffers_.reserve(16);
+}
+
 
 void AsyncLogging::append(const char* logline, int len)
 {
@@ -59,7 +83,7 @@ void AsyncLogging::threadFunc()
 {
   assert(running_ == true);
   latch_.countDown();
-  LogFile output(basename_, rollSize_, false);
+  LogFile output(basename_, logpath_, rollSize_, false);
   BufferPtr newBuffer1(new Buffer);
   BufferPtr newBuffer2(new Buffer);
   newBuffer1->bzero();

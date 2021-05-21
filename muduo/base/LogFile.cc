@@ -20,6 +20,7 @@ LogFile::LogFile(const string& basename,
                  int flushInterval,
                  int checkEveryN)
   : basename_(basename),
+    logPath_ (""), 
     rollSize_(rollSize),
     flushInterval_(flushInterval),
     checkEveryN_(checkEveryN),
@@ -32,6 +33,28 @@ LogFile::LogFile(const string& basename,
   assert(basename.find('/') == string::npos);
   rollFile();
 }
+
+LogFile::LogFile(const string& basename,
+                 const string& logpath,
+                 off_t rollSize,
+                 bool threadSafe,
+                 int flushInterval,
+                 int checkEveryN)
+  : basename_(basename),
+    logPath_(logpath),
+    rollSize_(rollSize),
+    flushInterval_(flushInterval),
+    checkEveryN_(checkEveryN),
+    count_(0),
+    mutex_(threadSafe ? new MutexLock : NULL),
+    startOfPeriod_(0),
+    lastRoll_(0),
+    lastFlush_(0)
+{
+  assert(basename.find('/') == string::npos);
+  rollFile();
+}
+
 
 LogFile::~LogFile() = default;
 
@@ -94,6 +117,8 @@ bool LogFile::rollFile()
 {
   time_t now = 0;
   string filename = getLogFileName(basename_, &now);
+  if(logPath_.length() > 1) // 当有内容的时候才弄。否则以前是啥还是啥。
+    filename = logPath_ + "/" + filename;
   time_t start = now / kRollPerSeconds_ * kRollPerSeconds_;
 
   if (now > lastRoll_)
@@ -117,7 +142,10 @@ string LogFile::getLogFileName(const string& basename, time_t* now)
   struct tm tm;
   *now = time(NULL);
   gmtime_r(now, &tm); // FIXME: localtime_r ?
-  strftime(timebuf, sizeof timebuf, ".%Y%m%d-%H%M%S.", &tm);
+  struct tm local_tm; // 在这里 我使用了本地时间
+  localtime_r(now,&local_tm);
+  //strftime(timebuf, sizeof timebuf, ".%Y%m%d-%H%M%S.", &tm);
+  strftime(timebuf, sizeof timebuf, ".%Y%m%d-%H%M%S.", &local_tm);
   filename += timebuf;
 
   filename += ProcessInfo::hostname();

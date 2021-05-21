@@ -26,6 +26,11 @@ class AsyncLogging : noncopyable
   AsyncLogging(const string& basename,
                off_t rollSize,
                int flushInterval = 3);
+  // add by xyq - 这里我是想把目录搞起来。
+  AsyncLogging(const string& basename,
+                off_t rollSize,
+                const string& logpath,
+                int flushInterval = 3);
 
   ~AsyncLogging()
   {
@@ -62,6 +67,7 @@ class AsyncLogging : noncopyable
   const int flushInterval_;
   std::atomic<bool> running_;
   const string basename_;
+  const string logpath_; // add by xyq 
   const off_t rollSize_;
   muduo::Thread thread_;
   muduo::CountDownLatch latch_;

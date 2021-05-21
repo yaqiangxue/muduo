@@ -27,6 +27,12 @@ class LogFile : noncopyable
           bool threadSafe = true,
           int flushInterval = 3,
           int checkEveryN = 1024);
+  LogFile(const string& basename,
+          const string& logpath,
+          off_t rollSize,
+          bool threadSafe = true,
+          int flushInterval = 3,
+          int checkEveryN = 1024);
   ~LogFile();
 
   void append(const char* logline, int len);
@@ -39,6 +45,7 @@ class LogFile : noncopyable
   static string getLogFileName(const string& basename, time_t* now);
 
   const string basename_;
+  const string logPath_;
   const off_t rollSize_;
   const int flushInterval_;
   const int checkEveryN_;
