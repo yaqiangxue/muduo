@@ -31,7 +31,7 @@ class EventLoopThread : noncopyable
                   const string& name = string());
   ~EventLoopThread();
   EventLoop* startLoop();
-
+  pid_t thread_pid(); // add by xyq xueyaqiang 2021Äê11ÔÂ1ÈÕ
  private:
   void threadFunc();
 

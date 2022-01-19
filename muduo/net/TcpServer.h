@@ -16,7 +16,7 @@
 #include "muduo/net/TcpConnection.h"
 
 #include <map>
-
+#include <vector>
 namespace muduo
 {
 namespace net
@@ -74,6 +74,8 @@ class TcpServer : noncopyable
   /// Thread safe.
   void start();
 
+  // 返回线程ID们－
+  void start(std::vector<pid_t>& vThreadIDS);
   /// Set connection callback.
   /// Not thread safe.
   void setConnectionCallback(const ConnectionCallback& cb)

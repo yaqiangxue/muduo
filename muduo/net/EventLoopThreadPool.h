@@ -36,6 +36,8 @@ class EventLoopThreadPool : noncopyable
   ~EventLoopThreadPool();
   void setThreadNum(int numThreads) { numThreads_ = numThreads; }
   void start(const ThreadInitCallback& cb = ThreadInitCallback());
+  // add by xueyaqiang xyq 2021年11月1日 - 返回这些线程们-
+  void start(std::vector<pid_t>& vThreadIDs,const ThreadInitCallback& cb = ThreadInitCallback());
 
   // valid after calling start()
   /// round-robin

@@ -51,6 +51,28 @@ void EventLoopThreadPool::start(const ThreadInitCallback& cb)
   }
 }
 
+void EventLoopThreadPool::start(std::vector<pid_t>& vThreadIDs,const ThreadInitCallback& cb)
+{
+  assert(!started_);
+  baseLoop_->assertInLoopThread();
+
+  started_ = true;
+
+  for (int i = 0; i < numThreads_; ++i)
+  {
+    char buf[name_.size() + 32];
+    snprintf(buf, sizeof buf, "%s%d", name_.c_str(), i);
+    EventLoopThread* t = new EventLoopThread(cb, buf);
+    vThreadIDs.push_back(t->thread_pid());// add xueyaqiang xyq 2021Äê11ÔÂ1ÈÕ
+    threads_.push_back(std::unique_ptr<EventLoopThread>(t));
+    loops_.push_back(t->startLoop());
+  }
+  if (numThreads_ == 0 && cb)
+  {
+    cb(baseLoop_);
+  }
+}
+
 EventLoop* EventLoopThreadPool::getNextLoop()
 {
   baseLoop_->assertInLoopThread();

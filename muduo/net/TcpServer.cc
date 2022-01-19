@@ -68,6 +68,19 @@ void TcpServer::start()
   }
 }
 
+// add by xueyaqiang xyq 2021Äê11ÔÂ1ÈÕ
+void TcpServer::start(std::vector<pid_t>& vThreadIDS)
+{
+  if (started_.getAndSet(1) == 0)
+  {
+    threadPool_->start(vThreadIDS,threadInitCallback_);
+
+    assert(!acceptor_->listenning());
+    loop_->runInLoop(
+        std::bind(&Acceptor::listen, get_pointer(acceptor_)));
+  }
+}
+
 void TcpServer::newConnection(int sockfd, const InetAddress& peerAddr)
 {
   loop_->assertInLoopThread();

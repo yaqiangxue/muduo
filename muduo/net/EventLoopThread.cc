@@ -75,3 +75,7 @@ void EventLoopThread::threadFunc()
   loop_ = NULL;
 }
 
+pid_t EventLoopThread::thread_pid()
+{
+  return thread_.tid();
+}
